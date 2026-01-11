@@ -1,0 +1,334 @@
+/* ===== 1. Modern Variables & Reset ===== */
+:root {
+  --primary: #6366f1;
+  --primary-dark: #4f46e5;
+  --accent: #f43f5e;
+  --bg-app: #0a0f1e; /* Deep Midnight Navy */
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --glass: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --shadow-premium: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  font-family: 'Inter', -apple-system, sans-serif;
+  line-height: 1.5;
+}
+
+.app-shell {
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ===== 2. Atmospheric Background Blobs ===== */
+.bg-blob {
+  position: fixed;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  filter: blur(140px);
+  z-index: 0;
+  opacity: 0.2;
+  pointer-events: none;
+}
+.blob-1 { background: var(--primary); top: -200px; right: -100px; }
+.blob-2 { background: var(--accent); bottom: -200px; left: -100px; }
+
+.page-container {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* ===== 3. Navbar (Glassmorphism) ===== */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(15px);
+  padding: 1rem 2.5rem;
+  border-radius: 24px;
+  border: 1px solid var(--glass-border);
+  margin-bottom: 3rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.logo-icon {
+  width: 42px; height: 42px;
+  background: var(--primary);
+  border-radius: 12px;
+  display: flex;
+  align-items: center; justify-content: center;
+  font-weight: 800; color: #fff;
+  box-shadow: 0 0 20px var(--primary);
+}
+
+.brand-text { font-size: 1.5rem; font-weight: 700; }
+.brand-text .accent { color: var(--primary); }
+
+.nav-btn {
+  padding: 0.8rem 1.6rem;
+  border-radius: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: 0.3s;
+}
+.btn-add { background: var(--primary); color: white; margin-right: 10px; }
+.btn-view { background: transparent; color: white; border: 1px solid var(--glass-border); }
+.nav-btn.active { box-shadow: 0 0 15px var(--primary); }
+
+/* ===== 4. Wide Glass Modal (The Fix) ===== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(7, 10, 19, 0.8);
+  backdrop-filter: blur(12px) saturate(180%);
+  display: flex;
+  align-items: center; /* Centers vertically */
+  justify-content: center; /* Centers horizontally */
+  z-index: 1000;
+  padding: 2rem;
+}
+
+.glass-modal-wide {
+  background: rgba(23, 28, 48, 0.8);
+  border: 1px solid var(--glass-border);
+  border-radius: 35px;
+  padding: 3rem;
+  width: 850px;
+  max-width: 100%;
+  
+  /* Prevent complete height take-over */
+  max-height: 90vh;
+  overflow-y: auto;
+  
+  box-shadow: var(--shadow-premium), 0 0 20px rgba(99, 102, 241, 0.1);
+  animation: modalIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-header-inline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2.5rem;
+}
+
+.close-x {
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  color: white;
+  width: 35px; height: 35px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.5rem;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ===== 5. Form Internal Layout ===== */
+.form-layout-grid {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 3rem;
+}
+
+.photo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.profile-preview {
+  width: 150px; height: 150px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px dashed var(--glass-border);
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.profile-preview img { width: 100%; height: 100%; object-fit: cover; }
+
+.glass-upload-btn {
+  background: var(--primary);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.data-section { display: flex; flex-direction: column; gap: 1.2rem; }
+.form-row { display: flex; gap: 1rem; }
+.form-group { display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
+
+.form-group label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+input, select, textarea {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid var(--glass-border) !important;
+  color: white !important;
+  padding: 12px 16px !important;
+  border-radius: 12px !important;
+  font-size: 0.95rem;
+  transition: 0.3s;
+}
+
+input:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+  outline: none;
+}
+
+/* ===== 6. Premium Footer ===== */
+.footer {
+  margin-top: 80px;
+  padding: 60px 40px 30px;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1); /* Subtle top border */
+  border-radius: 40px 40px 0 0;
+}
+
+.footer-top {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 40px;
+  margin-bottom: 50px;
+}
+
+.footer-nav {
+  display: flex;
+  gap: 80px; /* Space between link columns */
+}
+
+.link-group {
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Spacing between individual links */
+}
+
+.link-group a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: 0.3s;
+}
+
+.link-group a:hover {
+  color: var(--primary);
+  transform: translateX(5px);
+}
+
+.footer-bottom {
+  padding-top: 30px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.social-links { display: flex; gap: 25px; }
+.social-links span { color: var(--text-muted); font-weight: 600; cursor: pointer; }
+
+/* ===== 7. Animations ===== */
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.fade-slide-enter-active { transition: all 0.4s ease; }
+.fade-slide-enter-from { opacity: 0; transform: translateY(20px); }
+
+/* Responsive */
+@media (max-width: 850px) {
+  .form-layout-grid { grid-template-columns: 1fr; }
+  .footer-nav { gap: 40px; }
+}
+
+/* ===== Form Actions (Improved Spacing) ===== */
+.form-actions-premium {
+  display: flex;
+  justify-content: space-between; /* Pushes Discard to left, Confirm to right */
+  align-items: center;
+  gap: 2rem; /* Minimum safety gap */
+  padding-top: 2.5rem;
+  margin-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.btn-glass-cancel {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px 28px;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 140px; /* Ensures consistent button size */
+}
+
+.btn-glass-cancel:hover {
+  background: rgba(244, 63, 94, 0.1); /* Subtle rose tint on hover */
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.btn-primary-gradient {
+  background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+  color: white;
+  border: none;
+  padding: 12px 36px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  min-width: 200px;
+}
+
+.btn-primary-gradient:hover {
+  transform: translateY(-3px); /* Elegant lift */
+  box-shadow: 0 15px 30px rgba(99, 102, 241, 0.4);
+  filter: brightness(1.1);
+}
+
+.btn-primary-gradient:active {
+  transform: translateY(-1px);
+}
+
+/* Mobile fix for buttons */
+@media (max-width: 480px) {
+  .form-actions-premium {
+    flex-direction: column-reverse; /* Stack buttons with primary on top */
+    gap: 1rem;
+  }
+  .btn-primary-gradient, .btn-glass-cancel {
+    width: 100%;
+  }
+}
