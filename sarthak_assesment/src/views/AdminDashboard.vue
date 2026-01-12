@@ -4,9 +4,9 @@
 
     <aside class="sidebar">
       <div class="brand">
-        <div class="logo-circle">A</div>
+        <div class="logo-circle">S</div>
         <div class="brand-info">
-          <span class="brand-name">ADMIN<span class="accent">OS</span></span>
+          <span class="brand-name">Student<span class="accent">Sys</span></span>
         </div>
       </div>
 

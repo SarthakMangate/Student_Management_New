@@ -11,7 +11,6 @@ export async function askAI(question: string, context: any, history: any[] = [])
       - Total Students: ${context.totalStudents}
       - Departments: ${JSON.stringify(context.departmentCounts)}
       - Student List: ${context.studentNames}
-      - Student Age: ${context.studentAges}
     `;
 
     // 2. Call Cohere with a "General + Specific" instruction

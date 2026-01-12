@@ -7,7 +7,9 @@ export async function buildContext() {
   `);
 
   // Fetch all student names
-  const studentsRes = await pool.query(`SELECT name, course , age , email , phone , address , image FROM students`);
+  const studentsRes = await pool.query(
+    `SELECT name, course , age , email , phone , address , image FROM students`
+  );
 
   const distribution: Record<string, number> = {};
   let total = 0;
@@ -16,11 +18,16 @@ export async function buildContext() {
     total += r.count;
   });
 
-  const studentList = studentsRes.rows.map(s => `${s.name} (${s.course})`).join(", ");
+  const studentList = studentsRes.rows
+    .map(
+      (s) =>
+        `${s.name} (${s.course} ${s.email} (${s.phone} ${s.age} (${s.phone} ${s.gender})`
+    )
+    .join(", ");
 
   return {
     totalStudents: total,
     departmentCounts: distribution,
-    studentNames: studentList || "None"
+    studentNames: studentList || "None",
   };
 }

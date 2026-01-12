@@ -46,10 +46,6 @@
 
               </div>
             </div>
-            <div>
-              <h1>Welcome</h1>
-              <PublicHelpChatbot />
-            </div>
           </div>
         </div>
       </header>
@@ -95,6 +91,9 @@
         </div>
       </footer>
     </div>
+  </div>
+  <div>
+    <PublicHelpChatbot />
   </div>
 </template>
 

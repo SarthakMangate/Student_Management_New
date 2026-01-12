@@ -1,100 +1,106 @@
 <template>
-  <button class="chat-toggle" :class="{ 'active': open }" @click="open = !open">
-    <span v-if="!open">👋</span>
-    <span v-else>✕</span>
-  </button>
+  <div class="chatbot-root">
+    <button class="chat-toggle" :class="{ 'active': isOpen }" @click="isOpen = !isOpen">
+      <span v-if="!isOpen">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z" />
+        </svg>
+      </span>
+      <span v-else>✕</span>
+    </button>
 
-  <Transition name="pop">
-    <div v-if="open" class="chat-container">
-      <div class="chat-header">
-        <div class="header-main">
-          <div class="bot-avatar">OS</div>
-          <div>
-            <h4>Platform Explorer</h4>
-            <div class="online-status">
-              <span class="dot"></span> Guide is Online
+    <Transition name="pop">
+      <div v-if="isOpen" class="chat-container">
+        <div class="chat-header">
+          <div class="header-main">
+            <div class="bot-avatar">OS</div>
+            <div class="header-text">
+              <h4>Platform Explorer</h4>
+              <div class="online-status"><span class="dot"></span> Secure Mode</div>
             </div>
           </div>
-        </div>
-      </div>
-
-      <div class="chat-body" ref="chatBox">
-        <div class="welcome-hero">
-          <p>Welcome to <strong>AdminOS</strong>! I'm here to help you explore how our platform works and how it can
-            help manage your student data efficiently.</p>
-        </div>
-
-        <div v-for="(msg, index) in messages" :key="index" :class="['msg', msg.role]">
-          <div class="bubble">
-            <span v-if="msg.role === 'assistant'" class="bot-label">Platform Guide</span>
-            <div class="text" v-html="formatResponse(msg.content)"></div>
+          <div class="header-actions">
+            <button class="icon-btn" @click="confirmClear" title="Clear Chat">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18" />
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+              </svg>
+            </button>
+            <button class="icon-btn" @click="isOpen = false">✕</button>
           </div>
         </div>
 
-        <div v-if="loading" class="msg assistant">
-          <div class="bubble typing">
-            <span></span><span></span><span></span>
+        <div class="chat-body" ref="chatBox">
+          <div class="security-banner">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            Confidential data is restricted to Admin.
+          </div>
+
+          <div v-for="(msg, index) in messages" :key="index" :class="['msg-wrapper', msg.role]">
+            <div class="bubble">
+              <span v-if="msg.role === 'assistant'" class="bot-label">Platform Guide</span>
+              <div class="text" v-html="formatResponse(msg.content)"></div>
+            </div>
+          </div>
+
+          <div v-if="isLoading" class="msg-wrapper assistant">
+            <div class="bubble typing"><span></span><span></span><span></span></div>
           </div>
         </div>
 
-        <div v-if="!loading" class="quick-chips">
-          <button v-for="chip in chips" :key="chip" @click="handleChip(chip)">
-            {{ chip }}
-          </button>
+        <div v-if="!isLoading" class="quick-chips">
+          <div class="chip-grid">
+            <button v-for="chip in platformChips" :key="chip" @click="handleChip(chip)">{{ chip }}</button>
+          </div>
         </div>
-      </div>
 
-      <form class="chat-footer" @submit.prevent="sendMessage">
-        <input v-model="userInput" placeholder="Ask a question about AdminOS..." :disabled="loading" />
-        <button type="submit" :disabled="!userInput.trim() || loading">
-          <svg viewBox="0 0 24 24" width="20" height="20">
-            <path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-          </svg>
-        </button>
-      </form>
-    </div>
-  </Transition>
+        <form class="chat-footer" @submit.prevent="sendMessage">
+          <div class="input-container">
+            <input v-model="userInput" placeholder="Ask about platform features..." :disabled="isLoading" />
+            <button type="submit" :disabled="!userInput.trim() || isLoading" class="send-btn">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="3">
+                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+              </svg>
+            </button>
+          </div>
+        </form>
+      </div>
+    </Transition>
+  </div>
 </template>
 
-<script setup>
-import { ref, nextTick } from "vue";
+<script setup lang="ts">
+import { ref, nextTick, watch } from "vue";
 import api from "../utils/api";
 
-const open = ref(false);
-const userInput = ref("");
-const loading = ref(false);
-const chatBox = ref(null);
+interface Message { role: "user" | "assistant"; content: string; }
 
-// Suggestions for Visitors
-const chips = [
-  "What is the Tech Stack?",
-  "Is my data secure?",
-  "Can I filter students?",
-  "Mobile Responsiveness"
-];
-
-const messages = ref([
-  {
-    role: "assistant",
-    content: "Hello! Feel free to ask how to manage students, or click a suggestion below to see how the system handles records."
-  }
-]);
-
-// Basic formatter to handle bold text and line breaks for "clean and neat" look
-const formatResponse = (text) => {
-  return text
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
-    .replace(/\n/g, '<br>'); // Line breaks
+const WELCOME: Message = {
+  role: "assistant",
+  content: "I am the **StudentSys Explorer**. I can guide you through the UI and features, but I do not have access to live student data."
 };
+
+const isOpen = ref(false);
+const userInput = ref("");
+const isLoading = ref(false);
+const chatBox = ref<HTMLElement | null>(null);
+const messages = ref<Message[]>([WELCOME]);
+const platformChips = ["System Overview", "Is data safe?", "Who can use this?"];
+
+const formatResponse = (t: string) => t.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+
+const confirmClear = () => { if (confirm("Reset chat?")) messages.value = [WELCOME]; };
+
+const handleChip = (t: string) => { userInput.value = t; sendMessage(); };
 
 const scrollToBottom = async () => {
   await nextTick();
   if (chatBox.value) chatBox.value.scrollTop = chatBox.value.scrollHeight;
-};
-
-const handleChip = (text) => {
-  userInput.value = text;
-  sendMessage();
 };
 
 const sendMessage = async () => {
@@ -103,58 +109,63 @@ const sendMessage = async () => {
 
   messages.value.push({ role: "user", content: text });
   userInput.value = "";
-  loading.value = true;
+  isLoading.value = true;
   await scrollToBottom();
 
+  // --- STRICT FRONTEND PRIVACY FILTER ---
+  const lowerText = text.toLowerCase();
+  const restrictedTerms = ['student', 'record', 'database', 'db', 'sql', 'list', 'show', 'table', 'data', 'user', 'name'];
+
+  const isViolating = restrictedTerms.some(term => lowerText.includes(term));
+
+  if (isViolating) {
+    // We do NOT call the API here. We force a local response.
+    setTimeout(() => {
+      messages.value.push({
+        role: "assistant",
+        content: "I'm sorry, as a security measure, **I cannot access or display student records.** This information is strictly restricted to the Admin Dashboard. I can only assist with general platform navigation."
+      });
+      isLoading.value = false;
+      scrollToBottom();
+    }, 700);
+    return; // Kill the process
+  }
+
+  // --- API CALL ONLY FOR SAFE TOPICS ---
   try {
     const res = await api.post("/ai/ask", { question: text });
     messages.value.push({ role: "assistant", content: res.data.answer });
-  } catch (err) {
-    messages.value.push({
-      role: "assistant",
-      content: "**Connection Error.**\nI'm having trouble reaching the server. Please try again in a moment."
-    });
+  } catch {
+    messages.value.push({ role: "assistant", content: "Service error. Please refresh." });
   } finally {
-    loading.value = false;
+    isLoading.value = false;
     await scrollToBottom();
   }
 };
+
+watch(isOpen, (v) => v && scrollToBottom());
 </script>
 
 <style scoped>
-/* Main Container */
-.chat-container {
-  position: fixed;
-  bottom: 100px;
-  right: 30px;
-  width: 380px;
-  height: 600px;
-  max-height: 85vh;
-  background: #ffffff;
-  border-radius: 24px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  z-index: 1000;
-  overflow: hidden;
-  font-family: 'Inter', sans-serif;
-}
-
-/* Toggle Button */
-.chat-toggle {
+/* Sticky Bottom-Right */
+.chatbot-root {
   position: fixed;
   bottom: 30px;
   right: 30px;
-  width: 64px;
-  height: 64px;
+  z-index: 9999;
+  font-family: 'Inter', sans-serif;
+}
+
+.chat-toggle {
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   background: #2563eb;
   color: white;
   border: none;
   cursor: pointer;
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
   font-size: 24px;
-  z-index: 1001;
-  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
   transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -163,42 +174,59 @@ const sendMessage = async () => {
   transform: rotate(90deg);
 }
 
-/* Header */
+.chat-container {
+  position: absolute;
+  bottom: 80px;
+  right: 0;
+  width: 360px;
+  height: 580px;
+  background: white;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
 .chat-header {
   background: #2563eb;
   color: white;
-  padding: 24px;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .header-main {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .bot-avatar {
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   background: rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 800;
+  font-weight: bold;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.header-text h4 {
+  margin: 0;
   font-size: 14px;
 }
 
-.chat-header h4 {
-  margin: 0;
-  font-size: 16px;
-}
-
 .online-status {
-  font-size: 12px;
+  font-size: 10px;
   opacity: 0.8;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
 }
 
 .dot {
@@ -208,35 +236,46 @@ const sendMessage = async () => {
   border-radius: 50%;
 }
 
-/* Body & Messages */
+.icon-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  opacity: 0.7;
+}
+
 .chat-body {
   flex: 1;
-  padding: 20px;
+  padding: 16px;
   overflow-y: auto;
   background: #f8fafc;
 }
 
-.welcome-hero {
-  background: white;
-  padding: 16px;
-  border-radius: 16px;
-  margin-bottom: 24px;
-  border: 1px solid #e2e8f0;
-  font-size: 14px;
-  color: #64748b;
+.security-banner {
+  background: #fef2f2;
+  color: #b91c1c;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 11px;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #fee2e2;
 }
 
-.msg {
-  margin-bottom: 16px;
+.msg-wrapper {
+  margin-bottom: 15px;
   display: flex;
   flex-direction: column;
 }
 
-.msg.assistant {
+.assistant {
   align-items: flex-start;
 }
 
-.msg.user {
+.user {
   align-items: flex-end;
 }
 
@@ -245,118 +284,149 @@ const sendMessage = async () => {
   padding: 12px 16px;
   border-radius: 18px;
   font-size: 14px;
-  line-height: 1.6;
-  position: relative;
+  line-height: 1.5;
 }
 
 .assistant .bubble {
   background: white;
-  color: #1e293b;
   border: 1px solid #e2e8f0;
-  border-bottom-left-radius: 4px;
+  border-bottom-left-radius: 2px;
 }
 
 .user .bubble {
   background: #2563eb;
   color: white;
-  border-bottom-right-radius: 4px;
+  border-bottom-right-radius: 2px;
 }
 
 .bot-label {
   font-size: 10px;
-  text-transform: uppercase;
-  font-weight: 700;
+  font-weight: 800;
   color: #94a3b8;
-  display: block;
+  text-transform: uppercase;
   margin-bottom: 4px;
+  display: block;
 }
 
-/* Quick Chips */
 .quick-chips {
+  padding: 12px 16px;
+  background: #f8fafc;
+}
+
+.chip-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 15px;
+  gap: 6px;
 }
 
-.quick-chips button {
-  background: #ffffff;
+.chip-grid button {
+  background: white;
   border: 1px solid #e2e8f0;
-  color: #2563eb;
-  padding: 8px 14px;
+  padding: 6px 12px;
   border-radius: 20px;
   font-size: 12px;
   cursor: pointer;
-  transition: 0.2s;
-  font-weight: 500;
+  color: #475569;
 }
 
-.quick-chips button:hover {
-  border-color: #2563eb;
-  background: #eff6ff;
-}
-
-/* Footer */
 .chat-footer {
   padding: 16px;
   background: white;
   border-top: 1px solid #f1f5f9;
-  display: flex;
-  gap: 10px;
 }
 
-.chat-footer input {
+.input-container {
+  display: flex;
+  background: #f1f5f9;
+  border-radius: 14px;
+  padding: 4px 4px 4px 12px;
+  align-items: center;
+}
+
+input {
   flex: 1;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  padding: 10px 0;
   outline: none;
   font-size: 14px;
 }
 
-.chat-footer button {
+.send-btn {
   background: #2563eb;
   color: white;
   border: none;
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.chat-footer button:hover {
-  background: #1d4ed8;
-}
-
-/* Animations */
 .pop-enter-active,
 .pop-leave-active {
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .pop-enter-from,
 .pop-leave-to {
   opacity: 0;
-  transform: translateY(40px) scale(0.8);
+  transform: translateY(20px) scale(0.95);
+}
+
+.msg-wrapper {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.assistant {
+  align-items: flex-start;
+}
+
+.user {
+  align-items: flex-end;
+}
+
+.bubble {
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* BOT REPLY STYLES */
+.assistant .bubble {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-bottom-left-radius: 2px;
+  color: #000000;
+  /* Bot text color set to black */
+}
+
+/* Ensures any bold text inside the bot reply is also black */
+.assistant .bubble strong {
+  color: #000000;
+}
+
+/* USER REPLY STYLES (Keeping these white for contrast) */
+.user .bubble {
+  background: #2563eb;
+  color: white;
+  border-bottom-right-radius: 2px;
 }
 
 .typing span {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   background: #cbd5e1;
   display: inline-block;
   border-radius: 50%;
   margin: 0 2px;
   animation: type 1.4s infinite;
-}
-
-.typing span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.typing span:nth-child(3) {
-  animation-delay: 0.4s;
 }
 
 @keyframes type {
