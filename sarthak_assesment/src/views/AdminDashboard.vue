@@ -118,7 +118,7 @@
         <div class="confirm-card">
           <div class="confirm-icon">⚠️</div>
           <h3>Confirm Sign Out</h3>
-          <p>Are you sure you want to terminate your current session? You will need to log in again to access the dashboard.</p>
+          <p>Are you sure you want to terminate your current session?</p>
           <div class="confirm-actions">
             <button class="btn-cancel" @click="showLogoutConfirm = false">Stay Logged In</button>
             <button class="btn-confirm-logout" @click="handleLogout">Sign Out</button>
@@ -167,6 +167,8 @@
         </div>
       </div>
     </Transition>
+
+    <AdminAiChatbot />
   </div>
 </template>
 
@@ -175,6 +177,7 @@ import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import api from "../utils/api";
 import { useAuthStore } from "../store/auth";
+import AdminAiChatbot from "../components/AdminAiChatbot.vue";
 
 const auth = useAuthStore();
 const router = useRouter();

@@ -46,6 +46,10 @@
 
               </div>
             </div>
+            <div>
+              <h1>Welcome</h1>
+              <PublicHelpChatbot />
+            </div>
           </div>
         </div>
       </header>
@@ -96,6 +100,7 @@
 
 <script setup lang="ts">
 import { useRouter } from "vue-router";
+import PublicHelpChatbot from "../components/PublicHelpChatbot.vue";
 const router = useRouter();
 </script>
 
